@@ -7,6 +7,8 @@ using namespace std;
 //ввод года рождения
 //нормальный проход дерева
 //сортировка
+//уникальность паспорта
+//общий ввод чаровского массива
 
 const int SEG = 100;
 int hash_func(char *str);
@@ -130,25 +132,13 @@ char *enterPlaceNdate()
 {
 	char *num = new char[20];
 	std::cout << "Здесь Вы можете указать данные о выдаче паспорта." << endl;
-	cout << "Ecли Вы не желаете этого делать, нажмите 0. В противном случае нажмите 1." << endl;
-	int so; cin >> so;
-	if (so == 0)
-	{
-		num[0] = '-';
-		for (int i = 1; i < 20; ++i)
-		{
-			num[i] = 0;
-		}
-	}
-	else {
-		cout << "Введите место выдачи паспорта." << endl;
-		for (int i = 0; i < 19; i++)
-		{
-			cin >> num[i];
-		}
-		num[11] = 0;
-		printchar(num);
-	}
+	cout << "Введите место выдачи паспорта." << endl;
+	getchar();
+	for (int i = 0; i < 10; ++i)
+		num[i] = 0;
+	fgets(num, 20, stdin);
+	num[19] = 0;
+	printchar(num);
 	return num;
 }
 
@@ -324,8 +314,8 @@ struct Client
 				address[i] = 0;
 			}
 		}
-		right = 0;
-		left = 0;
+		left = right = 0;
+		height = 1;
 	}
 };
 
@@ -421,8 +411,7 @@ void print(Client *p, int level)
 	if (p)
 	{
 		print(p->left, level + 1);
-		for (int i = 0; i < level; i++)
-			printClient(p);
+		printClient(p);
 		print(p->right, level + 1);
 	}
 }
