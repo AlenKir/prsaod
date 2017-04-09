@@ -9,6 +9,8 @@ using namespace std;
 //сортировка
 //уникальность паспорта
 //общий ввод чаровского массива
+//не печатать пустой корень
+//очистка данных о клиентах
 
 const int SEG = 100;
 int hash_func(char *str);
@@ -254,18 +256,18 @@ struct status
 	}
 };
 
-struct Client
+class Client
 {
 	// № паспорта – строка формата «NNNN - NNNNNN», где N –цифры;
 	// Место и дата выдачи паспорта – строка;
 	// ФИО – строка;
 	// Год рождения – целое;
 	// Адрес – строка;
-
+public:
 	int  key;
 	int  height;
-	Client *left;
-	Client *right;
+	shared_ptr<Client> left;
+	shared_ptr<Client> right;
 
 	char pasport[12];
 	char placeNdate[20];
@@ -319,7 +321,8 @@ struct Client
 	}
 };
 
-int height(Client *p)
+
+int height(std::shared_ptr<Client> p)
 {
 	if (p)
 		return p->height;
@@ -327,7 +330,7 @@ int height(Client *p)
 		return 0;
 }
 
-void cor_height(Client* p)
+void cor_height(std::shared_ptr<Client> p)
 {
 	int hleft = height(p->left);
 	int hright = height(p->right);
@@ -337,24 +340,24 @@ void cor_height(Client* p)
 		p->height = hright + 1;
 }
 
-int bal_factor(Client *p)
+int bal_factor(std::shared_ptr<Client> p)
 {
 	int factor = height(p->right) - height(p->left);
 	return factor;
 }
 
-Client *rotateright(Client *p)
+std::shared_ptr<Client> rotateright(std::shared_ptr<Client> p)
 {
-	Client* q = p->left;
+	std::shared_ptr<Client> q = p->left;
 	p->left = q->right;
 	q->right = p;
 	cor_height(p);
 	cor_height(q);
 	return q;
 }
-Client *rotateleft(Client *q)
+std::shared_ptr<Client> rotateleft(std::shared_ptr<Client> q)
 {
-	Client* p = q->right;
+	std::shared_ptr<Client> p = q->right;
 	q->right = p->left;
 	p->left = q;
 	cor_height(q);
@@ -362,7 +365,7 @@ Client *rotateleft(Client *q)
 	return p;
 }
 
-Client *balance(Client *p)
+std::shared_ptr<Client> balance(std::shared_ptr<Client> p)
 {
 	cor_height(p);
 	if (bal_factor(p) == 2)
@@ -380,12 +383,11 @@ Client *balance(Client *p)
 	return p;
 }
 
-Client *insert(Client *root, int key, Client *c)
+std::shared_ptr<Client> insert(std::shared_ptr<Client> root, int key, std::shared_ptr<Client> c)
 {
 	if (!root)
 	{
-		Client *t = new Client(c->pasport, c->placeNdate, c->FIO, c->bdyear, c->address);
-		return t;
+		return c;
 	}
 	else
 	{
@@ -397,7 +399,7 @@ Client *insert(Client *root, int key, Client *c)
 	return balance(root);
 }
 
-void printClient(Client *c)
+void printClient(std::shared_ptr<Client> c)
 {
 	printchar(c->pasport);
 	printchar(c->placeNdate);
@@ -406,7 +408,7 @@ void printClient(Client *c)
 	printchar(c->address);
 }
 
-void print(Client *p, int level)
+void print(std::shared_ptr<Client> p, int level)
 {
 	if (p)
 	{
@@ -416,15 +418,14 @@ void print(Client *p, int level)
 	}
 }
 
-Client *addClient()
+std::shared_ptr<Client> addClient()
 {
-	Client *c;
 	char *pasport = new char[12]; pasport = enterPasp();
 	char *placeNdate = new char[20]; placeNdate = enterPlaceNdate();
 	char *FIO = new char[10]; FIO = enterFIO();
 	int bdyear = 0;
 	char address[10];
-	c = new Client(pasport, placeNdate, FIO, bdyear, address);
+	std::shared_ptr<Client> c(new Client(pasport, placeNdate, FIO, bdyear, address));
 	return c;
 }
 
@@ -439,7 +440,8 @@ int main()
 		hlist[i] = 0;
 	}
 
-	Client *tree = new Client("", "", "", 0, "");
+	std::shared_ptr<Client> tree(new Client("", "", "", 0, ""));
+	std::shared_ptr<Client> saved(new Client("-", "-", "-", 0, "-"));
 
 	int item = -1;
 	std::cout << "Добро пожаловать в систему обслуживания клиентов оператора сотовой связи!" << endl;
@@ -589,7 +591,7 @@ int main()
 		case 7:
 		{
 			cout << "Регистрация нового клиента:" << endl;
-			Client *c = addClient();
+			std::shared_ptr<Client> c = addClient();
 
 			tree = insert(tree, c->key, c);
 
@@ -613,7 +615,8 @@ int main()
 		case 10:
 		{
 			cout << "Очистка данных о клиентах." << endl;
-			Client *tree = new Client("", "", "", 0, "");
+			tree = NULL;
+			tree = saved;
 			break;
 		}
 		case 11:
