@@ -439,7 +439,7 @@ int main()
 		hlist[i] = 0;
 	}
 
-	Client *tree = new Client("1111-111111", "Montana", "Joe", 1999, "Montana");
+	Client *tree = new Client("", "", "", 0, "");
 
 	int item = -1;
 	std::cout << "Добро пожаловать в систему обслуживания клиентов оператора сотовой связи!" << endl;
@@ -613,6 +613,7 @@ int main()
 		case 10:
 		{
 			cout << "Очистка данных о клиентах." << endl;
+			Client *tree = new Client("", "", "", 0, "");
 			break;
 		}
 		case 11:
