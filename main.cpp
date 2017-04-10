@@ -71,7 +71,7 @@ void printchar(char* m)
 char *enterNsim()
 {
 	char *num = new char[12];
-	std::cout << "Введите номер в формате 10 цифр. Тире будет добавлено автоматически." << endl;
+	std::cout << "Введите номер карты в формате 10 цифр. Тире будет добавлено автоматически." << endl;
 	for (int i = 0; i < 11; i++)
 	{
 		if (i == 3)
@@ -246,7 +246,9 @@ public:
 			pasport[i] = p[i];
 		pasport[11] = 0;
 		std::hash<std::string> h;
-		key = h(p);
+		key = (h(p));
+		if (key < 0)
+			key *= -1;
 
 		for (int i = 0; i < 20; i++)
 		{
@@ -706,7 +708,8 @@ int main()
 			std::cout << "Регистрация выдачи клиенту SIM-карты." << endl;
 			char *pasp = new char[12]; pasp = enterPasp();
 			std::shared_ptr<Client> t(new Client(pasp, "", "", 0, ""));
-			int found = 0; found = findClient(tree, t->key, 0);
+			int found = 0;
+			found = findClient(tree, t->key, 0);
 			if (found == 0)
 			{
 				cout << "Данного клиента нет в базе. Необходимо его зарегистрировать." << endl;
