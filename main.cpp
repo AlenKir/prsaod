@@ -392,23 +392,24 @@ std::shared_ptr<Client> addClient()
 	return c;
 }
 
-std::uint32_t findClient(std::shared_ptr<Client> p, std::uint32_t key, std::uint32_t steps)
+bool findClient(std::shared_ptr<Client> p, std::uint32_t key, bool steps)
 {
 	//изменено
 	if (p) {
 		if (p->key == key)
 		{
 			printClient(p);
+			steps = true;
 			return steps;
 		}
 		if (key < p->key)
 		{
-			steps = findClient(p->left, key, steps + 1);
+			steps = findClient(p->left, key, steps);
 			return steps;
 		}
 		else
 		{
-			steps = findClient(p->right, key, steps + 1);
+			steps = findClient(p->right, key, steps);
 			return steps;
 		}
 	}
