@@ -11,6 +11,7 @@ using namespace std;
 //общий ввод чаровского массива
 //не печатать пустой корень
 //очистка данных о клиентах
+//ввод лет выдачи и конца д-я
 
 const int SEG = 100;
 int hash_func(char *str);
@@ -217,44 +218,6 @@ int hashplus(SIM *h[SEG], char *s)
 	}
 }
 
-struct status
-{
-	char SIM_num[12];
-	char pasport[12];
-	unsigned int dateGiven[3];
-	unsigned int dateEnd[3];
-	status *next;
-
-	status(char *s_num)
-	{
-		for (int i = 0; i < 11; ++i)
-			SIM_num[i] = s_num[i];
-		SIM_num[11] = '/0';
-
-		for (int i = 0; i < 11; ++i)
-			pasport[i] = 0;
-		pasport[11] = '/0';
-
-		dateGiven[0] = 0; dateGiven[1] = 0; dateGiven[2] = 0;
-		dateEnd[0] = 0; dateEnd[1] = 0; dateEnd[2] = 0;
-		next = 0;
-	}
-
-	status(char *s_num, char *pasp, int dg[3], int de[3])
-	{
-		for (int i = 0; i < 11; ++i)
-			SIM_num[i] = s_num[i];
-		SIM_num[11] = '/0';
-
-		for (int i = 0; i < 11; ++i)
-			pasport[i] = pasp[i];
-		pasport[11] = '/0';
-
-		dateGiven[0] = dg[0]; dateGiven[1] = dg[1]; dateGiven[2] = dg[2];
-		dateEnd[0] = de[0]; dateEnd[1] = de[1]; dateEnd[2] = de[2];
-		next = 0;
-	}
-};
 
 class Client
 {
@@ -490,6 +453,45 @@ std::shared_ptr<Client> removeClient(std::shared_ptr<Client> p, std::uint32_t k)
 	return balance(p);
 }
 
+struct status
+{
+	char SIM_num[12];
+	char pasport[12];
+	unsigned int dateGiven[3];
+	unsigned int dateEnd[3];
+	status *next;
+
+	status(char *s_num)
+	{
+		for (int i = 0; i < 11; ++i)
+			SIM_num[i] = s_num[i];
+		SIM_num[11] = '/0';
+
+		for (int i = 0; i < 11; ++i)
+			pasport[i] = 0;
+		pasport[11] = '/0';
+
+		dateGiven[0] = 0; dateGiven[1] = 0; dateGiven[2] = 0;
+		dateEnd[0] = 0; dateEnd[1] = 0; dateEnd[2] = 0;
+		next = 0;
+	}
+
+	status(char *s_num, char *pasp, int dg[3], int de[3])
+	{
+		for (int i = 0; i < 11; ++i)
+			SIM_num[i] = s_num[i];
+		SIM_num[11] = '/0';
+
+		for (int i = 0; i < 11; ++i)
+			pasport[i] = pasp[i];
+		pasport[11] = '/0';
+
+		dateGiven[0] = dg[0]; dateGiven[1] = dg[1]; dateGiven[2] = dg[2];
+		dateEnd[0] = de[0]; dateEnd[1] = de[1]; dateEnd[2] = de[2];
+		next = 0;
+	}
+};
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -695,6 +697,39 @@ int main()
 		{
 			cout << "Поиск клиента по фрагментам ФИО или адреса" << endl;
 			break;
+		}
+		case 13:
+		{
+			std::cout << "Регистрация выдачи клиенту SIM-карты." << endl;
+			char *pasp = new char[12]; pasp = enterPasp();
+			std::shared_ptr<Client> t(new Client(pasp, "", "", 0, ""));
+			int found = 0; found = findClient(tree, t->key, 0);
+			if (found == 0)
+			{
+				cout << "Данного клиента нет в базе. Необходимо его зарегистрировать." << endl;
+				break;
+			}
+			else
+			{
+				char *num = new char[12]; num = enterNsim();
+				int sim_key = hash_func(num);
+				if (!exists(hlist[sim_key]))
+				{
+					cout << "Данной СИМ-карты нет в базе. Перед выдачей необходимо ее зарегистрировать." << endl;
+					//это вообще не очень законно, да?
+					break;
+				}
+				else
+				{
+					//ввод ЛЕТ
+					int dg[3]; int de[3];
+					status *reg = new status(num, pasp, dg, de);
+				}
+			}
+		}
+		case 14:
+		{
+			std::cout << "Регистрация возврата SIM-карты от клиента" << endl;
 		}
 		}
 		cout << endl;
