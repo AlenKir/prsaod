@@ -429,6 +429,31 @@ std::shared_ptr<Client> addClient()
 	return c;
 }
 
+std::uint32_t findClient(std::shared_ptr<Client> p, std::uint32_t key, std::uint32_t steps)
+{
+	//изменено
+	if (p) {
+		if (p->key == key)
+		{
+			printClient(p);
+			return steps;
+		}
+		if (key < p->key)
+		{
+			steps = findClient(p->left, key, steps + 1);
+			return steps;
+		}
+		else
+		{
+			steps = findClient(p->right, key, steps + 1);
+			return steps;
+		}
+	}
+	return 0;
+}
+
+
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -622,6 +647,9 @@ int main()
 		case 11:
 		{
 			cout << "Поиск клиента по номеру паспорта" << endl;
+			char *n = new char[12]; n = enterPasp();
+			std::shared_ptr<Client> t(new Client(n, "", "", 0, ""));
+			findClient(tree, t->key, 0);
 			break;
 		}
 		case 12:
