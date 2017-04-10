@@ -452,7 +452,43 @@ std::uint32_t findClient(std::shared_ptr<Client> p, std::uint32_t key, std::uint
 	return 0;
 }
 
+std::shared_ptr<Client> findmin(std::shared_ptr<Client> p)
+{
+	if (p->left)
+		return findmin(p->left);
+	else
+		return p;
+}
 
+std::shared_ptr<Client> removemin(std::shared_ptr<Client> p)
+{
+	if (!p->left)
+		return p->right;
+	else
+		p->left = removemin(p->left);
+	return balance(p);
+}
+
+std::shared_ptr<Client> removeClient(std::shared_ptr<Client> p, std::uint32_t k)
+{
+	if (!p)
+		return 0;
+	if (k < p->key)
+		p->left = removeClient(p->left, k);
+	else if (k > p->key)
+		p->right = removeClient(p->right, k);
+	else
+	{
+		std::shared_ptr<Client> q = p->left;
+		std::shared_ptr<Client> r = p->right;
+		if (!r) return q;
+		std::shared_ptr<Client> min = findmin(r);
+		min->right = removemin(r);
+		min->left = q;
+		return balance(min);
+	}
+	return balance(p);
+}
 
 int main()
 {
