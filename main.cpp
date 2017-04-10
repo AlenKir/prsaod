@@ -665,6 +665,9 @@ int main()
 		case 8:
 		{
 			cout << "Снятие с обслуживания клиента" << endl;
+			char *n = new char[12]; n = enterPasp();
+			std::shared_ptr<Client> t(new Client(n, "", "", 0, ""));
+			removeClient(tree, t->key);
 			break;
 		}
 		case 9:
