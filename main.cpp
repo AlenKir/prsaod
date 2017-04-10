@@ -506,6 +506,8 @@ int main()
 	std::shared_ptr<Client> tree(new Client("", "", "", 0, ""));
 	std::shared_ptr<Client> saved(new Client("-", "-", "-", 0, "-"));
 
+	status *first = NULL;
+
 	int item = -1;
 	std::cout << "Добро пожаловать в систему обслуживания клиентов оператора сотовой связи!" << endl;
 	while (item != 0)
@@ -724,6 +726,12 @@ int main()
 					//ввод ЛЕТ
 					int dg[3]; int de[3];
 					status *reg = new status(num, pasp, dg, de);
+					status *temp = first;
+					while (temp)
+					{
+						temp = temp->next;
+					}
+					temp = reg;
 				}
 			}
 		}
