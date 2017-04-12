@@ -12,6 +12,8 @@ using namespace std;
 //не печатать пустой корень
 //очистка данных о клиентах
 //ввод лет выдачи и конца д-я
+//данная карта уже занята (13)
+
 
 const int SEG = 100;
 int hash_func(char *str);
@@ -383,12 +385,84 @@ void print(std::shared_ptr<Client> p, int level)
 	}
 }
 
+bool check_outYear(int year)
+{
+	bool alright = true;
+
+	if ((year > 2017) || (year < 1990))
+	{
+		alright = false;
+		cout << "Wrong year." << endl;
+	}
+	return alright;
+}
+
+bool check_outDate(int day, int month, int year)
+{
+	bool alright = true;
+
+	if ((year > 2017) || (year < 1990))
+	{
+		alright = false;
+		cout << "Wrong year." << endl;
+	}
+
+	if (month == 2)
+	{
+		if (day > 28) {
+			if (year % 4 != 0)
+			{
+				alright = false;
+				cout << "There're only 28 days in this February!" << endl;
+			}
+			else
+			{
+				if (day > 29)
+				{
+					alright = false;
+					cout << "There're only 29 days in this February." << endl;
+				}
+			}
+		}
+	}
+	else
+	{
+		if (day > 31)
+		{
+			alright = false;
+			cout << "Not more than 31 days per month! (Dunno why, though...)" << endl;
+		}
+		else
+		{
+			if ((month == 4 || month == 6 || month == 9 || month == 11) && (day > 30))
+			{
+				alright = false;
+				cout << "Not more than 30 days in this month!" << endl;
+			}
+		}
+	}
+
+	if ((month > 12) || (month < 1) || (day < 1))
+	{
+		alright = false;
+		cout << "Wrong month." << endl;
+	}
+
+	return alright;
+}
+
 std::shared_ptr<Client> addClient()
 {
 	char *pasport = new char[12]; pasport = enterPasp();
 	char *placeNdate = new char[20]; placeNdate = enterPlaceNdate();
 	char *FIO = new char[10]; FIO = enterFIO();
 	int bdyear = 0;
+	bool right = false;
+	while (!right) {
+		cout << "Введите год рождения:" << endl;
+		cin >> bdyear;
+		right = check_outYear(bdyear);
+	}
 	char address[10];
 	std::shared_ptr<Client> c(new Client(pasport, placeNdate, FIO, bdyear, address));
 	return c;
@@ -663,10 +737,7 @@ int main()
 
 			tree = insert(tree, c->key, c);
 
-			//tree = insert(tree, key);
-			//tree = balance(tree);
-
-			cout << "Невозможно добавление клиента с таким же номером паспорта." << endl;
+			//cout << "Невозможно добавление клиента с таким же номером паспорта." << endl;
 			break;
 		}
 		case 8:
@@ -741,7 +812,38 @@ int main()
 		}
 		case 14:
 		{
-			std::cout << "Регистрация возврата SIM-карты от клиента" << endl;
+			std::cout << "Регистрация возврата SIM-карты от клиента:" << endl;
+			char *pasp = new char[12]; pasp = enterPasp();
+			std::shared_ptr<Client> t(new Client(pasp, "", "", 0, ""));
+			int found = 0;
+			found = findClient(tree, t->key, 0);
+			if (found == 0)
+			{
+				cout << "Данного клиента нет в базе." << endl;
+				break;
+			}
+			else
+			{
+				char *num = new char[12]; num = enterNsim();
+				int sim_key = hash_func(num);
+				if (!exists(hlist[sim_key]))
+				{
+					cout << "Данной СИМ-карты нет в базе." << endl;
+					break;
+				}
+				else
+				{
+					//ввод ЛЕТ
+					int dg[3]; int de[3];
+					status *reg = new status(num, pasp, dg, de);
+					status *temp = first;
+					while (temp)
+					{
+						temp = temp->next;
+					}
+					temp = reg;
+				}
+			}
 		}
 		}
 		cout << endl;
