@@ -9,7 +9,6 @@ using namespace std;
 //сортировка
 //уникальность паспорта
 //общий ввод чаровского массива
-//не печатать пустой корень
 //очистка данных о клиентах
 //ввод лет выдачи и конца д-я
 //данная карта уже занята (13)
@@ -21,11 +20,27 @@ using namespace std;
 //delete
 //проверка года добавления в базу
 //поиск СИМкарты: почему "карт не обнаружено" и почему он не все найденные по тарифу выводит
-//что за ноль в выводе клиентов. пофиксить, хотя бы отображение
 
 
 const int SEG = 100;
 int hash_func(char *str);
+
+char *enterChar(int size)
+{
+	int i = 0;
+	char *c = new char[size];
+	for (i = 0; i < size; i++)
+	{
+		cin >> c[i];
+		if (c[i] == '\n')
+			break;
+	}
+	for (int j = i; j < size; j++)
+		c[j] = 0;
+	c[size - 1] = '\0';
+	cout << c;
+	return c;
+}
 
 struct SIM
 {
@@ -377,6 +392,7 @@ std::shared_ptr<Client> insert(std::shared_ptr<Client> root, int key, std::share
 
 void printClient(std::shared_ptr<Client> c)
 {
+	if (c->bdyear == 0) return;
 	printchar(c->pasport);
 	printchar(c->placeNdate);
 	printchar(c->FIO);
