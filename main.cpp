@@ -2,10 +2,9 @@
 #include <Windows.h>
 #include <memory>
 using namespace std;
-//поиск SIM-карты по номеру SIM-карты
 //место и дата выдачи паспорта
 //нормальный проход дерева
-//сортировка
+//сортировка  
 //ввод лет выдачи и конца д-я
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
@@ -13,11 +12,14 @@ using namespace std;
 //заполняться данными таким образом, чтобы продемонстрировать процесс его
 //балансировки.
 //delete
-//проверка года добавления в базу
 //поиск СИМкарты: почему "карт не обнаружено" и почему он не все найденные по тарифу выводит
 //возврат сим-карты, признак наличия
 //работа с признаком наличия
 //признак наличия где должен быть, в какой структуре
+//не выдавать уже выданную
+//хэшфункция с коллизией в 13 и 14
+//проверки на длину? числа?
+//enterDate - !!!
 
 const int SEG = 100;
 int hash_func(char *str);
@@ -475,6 +477,24 @@ bool check_outDate(int day, int month, int year)
 	}
 
 	return alright;
+}
+
+int *enterDate()
+{
+	bool alright = false; int d, m, y;
+	while (alright)
+	{
+		cout << "Enter day:" << endl;
+		cin >> d;
+		cout << "Enter month:" << endl;
+		cin >> m;
+		cout << "Enter year:" << endl;
+		cin >> y;
+		alright = check_outDate(d, m, y);
+	}
+	int date[3];
+	date[0] = d; date[1] = m; date[2] = y;
+	return date;
 }
 
 std::shared_ptr<Client> addClient()
