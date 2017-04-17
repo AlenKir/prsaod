@@ -4,11 +4,8 @@
 using namespace std;
 //поиск SIM-карты по номеру SIM-карты
 //место и дата выдачи паспорта
-//ввод года рождения
 //нормальный проход дерева
 //сортировка
-//общий ввод чаровского массива
-//очистка данных о клиентах
 //ввод лет выдачи и конца д-я
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
@@ -841,6 +838,8 @@ int main()
 						temp = temp->next;
 					}
 					temp = reg;
+					int k = hash_func("num");
+					hlist[k]->isFree = false;
 				}
 			}
 			break;
@@ -877,6 +876,8 @@ int main()
 						temp = temp->next;
 					}
 					temp = reg;
+					int k = hash_func("num");
+					hlist[k]->isFree = true;
 				}
 			}
 			break;
