@@ -7,7 +7,6 @@ using namespace std;
 //ввод года рождения
 //нормальный проход дерева
 //сортировка
-//уникальность паспорта
 //общий ввод чаровского массива
 //очистка данных о клиентах
 //ввод лет выдачи и конца д-я
@@ -19,7 +18,9 @@ using namespace std;
 //delete
 //проверка года добавления в базу
 //поиск СИМкарты: почему "карт не обнаружено" и почему он не все найденные по тарифу выводит
-
+//возврат сим-карты, признак наличия
+//работа с признаком наличия
+//признак наличия где должен быть, в какой структуре
 
 const int SEG = 100;
 int hash_func(char *str);
@@ -138,11 +139,27 @@ char *enterTarif()
 	return t;
 }
 
+bool check_outYear(int year)
+{
+	bool alright = true;
+
+	if ((year > 2017) || (year < 1990))
+	{
+		alright = false;
+		cout << "Wrong year." << endl;
+	}
+	return alright;
+}
+
 int enterY()
 {
-	int y = 0;
-	std::cout << "Введите год выпуска:" << endl;
-	cin >> y;
+	int y = 0; bool alright = false;
+	while (!alright)
+	{
+		std::cout << "Введите год выпуска:" << endl;
+		cin >> y;
+		alright = check_outYear(y);
+	}
 	return y;
 }
 
@@ -409,18 +426,6 @@ void print(std::shared_ptr<Client> p, int level)
 	}
 }
 
-bool check_outYear(int year)
-{
-	bool alright = true;
-
-	if ((year > 2017) || (year < 1990))
-	{
-		alright = false;
-		cout << "Wrong year." << endl;
-	}
-	return alright;
-}
-
 bool check_outDate(int day, int month, int year)
 {
 	bool alright = true;
@@ -561,6 +566,7 @@ struct status
 	unsigned int dateGiven[3];
 	unsigned int dateEnd[3];
 	status *next;
+	bool free;
 
 	status(char *s_num)
 	{
@@ -575,6 +581,8 @@ struct status
 		dateGiven[0] = 0; dateGiven[1] = 0; dateGiven[2] = 0;
 		dateEnd[0] = 0; dateEnd[1] = 0; dateEnd[2] = 0;
 		next = 0;
+
+		free = true;
 	}
 
 	status(char *s_num, char *pasp, int dg[3], int de[3])
@@ -590,6 +598,7 @@ struct status
 		dateGiven[0] = dg[0]; dateGiven[1] = dg[1]; dateGiven[2] = dg[2];
 		dateEnd[0] = de[0]; dateEnd[1] = de[1]; dateEnd[2] = de[2];
 		next = 0;
+		free = false;
 	}
 };
 
@@ -860,8 +869,8 @@ int main()
 				else
 				{
 					//ввод ЛЕТ
-					int dg[3]; int de[3];
-					status *reg = new status(num, pasp, dg, de);
+					//int dg[3]; int de[3];
+					status *reg = new status(num);
 					status *temp = first;
 					while (temp)
 					{
