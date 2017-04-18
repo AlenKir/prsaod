@@ -20,8 +20,11 @@ using namespace std;
 //хэшфункция с коллизией в 13 и 14
 //проверки на длину? числа?
 //enterDate - !!!
+//убрать все "магические числа"
 
 const int SEG = 100;
+const int AD = 20;
+const int NAME = 20;
 int hash_func(char *str);
 
 char *enterChar(int size)
@@ -142,7 +145,7 @@ bool check_outYear(int year)
 {
 	bool alright = true;
 
-	if ((year > 2017) || (year < 1990))
+	if ((year > 2017) || (year < 1900))
 	{
 		alright = false;
 		cout << "Wrong year." << endl;
@@ -176,7 +179,7 @@ char *enterPlaceNdate()
 {
 	char *num = new char[20];
 	std::cout << "Здесь Вы можете указать данные о выдаче паспорта." << endl;
-	cout << "Введите место выдачи паспорта." << endl;
+	cout << "Введите место и дату выдачи паспорта." << endl;
 	getchar();
 	for (int i = 0; i < 10; ++i)
 		num[i] = 0;
@@ -188,11 +191,11 @@ char *enterPlaceNdate()
 
 char *enterFIO()
 {
-	char *num = new char[10];
+	char *num = new char[NAME];
 	std::cout << "Введите имя клиента." << endl;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < NAME; ++i)
 		num[i] = 0;
-	fgets(num, 10, stdin);
+	fgets(num, NAME, stdin);
 	printchar(num);
 	return num;
 }
@@ -275,9 +278,9 @@ public:
 
 	char pasport[12];
 	char placeNdate[20];
-	char FIO[10];
+	char FIO[NAME];
 	int bdyear;
-	char address[10];
+	char address[AD];
 
 	Client() {}
 
@@ -301,7 +304,7 @@ public:
 			}
 		}
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < NAME; i++)
 		{
 			if (f[i])
 				FIO[i] = f[i];
@@ -313,7 +316,7 @@ public:
 
 		bdyear = y;
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < AD; i++)
 		{
 			if (ad[i])
 				address[i] = ad[i];
@@ -501,7 +504,7 @@ std::shared_ptr<Client> addClient()
 {
 	char *pasport = new char[12]; pasport = enterPasp();
 	char *placeNdate = new char[20]; placeNdate = enterPlaceNdate();
-	char *FIO = new char[10]; FIO = enterFIO();
+	char *FIO = new char[NAME]; FIO = enterFIO();
 	int bdyear = 0;
 	bool right = false;
 	while (!right) {
@@ -509,7 +512,12 @@ std::shared_ptr<Client> addClient()
 		cin >> bdyear;
 		right = check_outYear(bdyear);
 	}
-	char address[10];
+	char *address = new char[AD];
+	cout << "Введите адрес:" << endl;
+	getchar();
+	for (int i = 0; i < AD; ++i)
+		address[i] = 0;
+	fgets(address, AD, stdin);
 	std::shared_ptr<Client> c(new Client(pasport, placeNdate, FIO, bdyear, address));
 	return c;
 }
