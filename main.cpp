@@ -107,6 +107,10 @@ char *enterNsim()
 			num[i] = '-'; i++;
 		}
 		cin >> num[i];
+		if (num[i] < 48 || num[i] > 57) {
+			cout << "Numbers, please." << endl;
+			cin >> num[i];
+		}
 	}
 	num[11] = 0;
 	printchar(num);
@@ -124,6 +128,10 @@ char *enterPasp()
 			num[i] = '-'; i++;
 		}
 		cin >> num[i];
+		if (num[i] < 48 || num[i] > 57) {
+			cout << "Numbers, please." << endl;
+			cin >> num[i];
+		}
 	}
 	num[11] = 0;
 	printchar(num);
