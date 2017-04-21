@@ -18,9 +18,10 @@ using namespace std;
 //признак наличия где должен быть, в какой структуре
 //не выдавать уже выданную
 //хэшфункция с коллизией в 13 и 14
-//проверки на длину? числа?
-//enterDate - !!!
+//проверки на длину?
 //убрать все "магические числа"
+//дата выдачи и дата возврата - надо же где-то выводить эту информацию
+//получается, что дата возврата ВООБЩЕ никуда не идет. в 14 пункте. может, конструктор переписать
 
 const int SEG = 100;
 const int AD = 20;
@@ -108,7 +109,7 @@ char *enterNsim()
 		}
 		cin >> num[i];
 		if (num[i] < 48 || num[i] > 57) {
-			cout << "Numbers, please." << endl;
+			cout << "Числа, пожалуйста." << endl;
 			cin >> num[i];
 		}
 	}
@@ -129,7 +130,7 @@ char *enterPasp()
 		}
 		cin >> num[i];
 		if (num[i] < 48 || num[i] > 57) {
-			cout << "Numbers, please." << endl;
+			cout << "Числа, пожалуйста." << endl;
 			cin >> num[i];
 		}
 	}
@@ -493,17 +494,17 @@ bool check_outDate(int day, int month, int year)
 int *enterDate()
 {
 	bool alright = false; int d, m, y;
-	while (alright)
+	while (!alright)
 	{
-		cout << "Enter day:" << endl;
+		cout << "Введите день:" << endl;
 		cin >> d;
-		cout << "Enter month:" << endl;
+		cout << "Введите месяц:" << endl;
 		cin >> m;
-		cout << "Enter year:" << endl;
+		cout << "Введите год:" << endl;
 		cin >> y;
 		alright = check_outDate(d, m, y);
 	}
-	int date[3];
+	int *date = new int[3];
 	date[0] = d; date[1] = m; date[2] = y;
 	return date;
 }
@@ -866,7 +867,10 @@ int main()
 				else
 				{
 					//ввод ЛЕТ
-					int dg[3]; int de[3];
+					cout << "Введите дату выдачи." << endl;
+					int *dg = new int[3];
+					dg = enterDate();
+					int de[3] = { 0, 0, 0 };
 					status *reg = new status(num, pasp, dg, de);
 					status *temp = first;
 					while (temp)
@@ -904,7 +908,9 @@ int main()
 				else
 				{
 					//ввод ЛЕТ
-					//int dg[3]; int de[3];
+					cout << "Дата возврата карты." << endl;
+					int *de = new int[3];
+					de = enterDate();
 					status *reg = new status(num);
 					status *temp = first;
 					while (temp)
