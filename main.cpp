@@ -2,10 +2,8 @@
 #include <Windows.h>
 #include <memory>
 using namespace std;
-//место и дата выдачи паспорта
 //нормальный проход дерева
 //сортировка  
-//ввод лет выдачи и конца д-я
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
 //несколько элементов, образующих коллизию, а АВЛ - дерево должно
@@ -22,6 +20,8 @@ using namespace std;
 //убрать все "магические числа"
 //дата выдачи и дата возврата - надо же где-то выводить эту информацию
 //получается, что дата возврата ВООБЩЕ никуда не идет. в 14 пункте. может, конструктор переписать
+//выводить номера карт клиента?
+//хэш функция в 13, коллизия
 
 const int SEG = 100;
 const int AD = 20;
@@ -864,6 +864,11 @@ int main()
 					//это вообще не очень законно, да?
 					break;
 				}
+				else if (exists(hlist[sim_key]) && !hlist[sim_key]->isFree)
+				{
+					cout << "Данная сим-карта уже занята." << endl;
+					break;
+				}
 				else
 				{
 					//ввод ЛЕТ
@@ -878,7 +883,7 @@ int main()
 						temp = temp->next;
 					}
 					temp = reg;
-					int k = hash_func("num");
+					int k = hash_func(num);
 					hlist[k]->isFree = false;
 				}
 			}
@@ -905,6 +910,11 @@ int main()
 					cout << "Данной СИМ-карты нет в базе." << endl;
 					break;
 				}
+				else if (exists(hlist[sim_key]) && !hlist[sim_key]->isFree)
+				{
+					cout << "Данная сим-карта уже занята." << endl;
+					break;
+				}
 				else
 				{
 					//ввод ЛЕТ
@@ -918,7 +928,7 @@ int main()
 						temp = temp->next;
 					}
 					temp = reg;
-					int k = hash_func("num");
+					int k = hash_func(num);
 					hlist[k]->isFree = true;
 				}
 			}
