@@ -22,6 +22,8 @@ using namespace std;
 //получается, что дата возврата ВООБЩЕ никуда не идет. в 14 пункте. может, конструктор переписать
 //выводить номера карт клиента?
 //хэш функция в 13, коллизия
+//удалить список delete 
+//напишем списочек требований
 
 const int SEG = 100;
 const int AD = 20;
@@ -593,6 +595,23 @@ std::shared_ptr<Client> removeClient(std::shared_ptr<Client> p, std::uint32_t k)
 	return balance(p);
 }
 
+std::shared_ptr<Client> removeAllClients(std::shared_ptr<Client> p, int level)
+{
+	if (p)
+	{
+		if (p->left) {
+			removeAllClients(p->left, level + 1);
+			p->left = NULL;
+		}
+		else if (p->right) {
+			removeAllClients(p->right, level + 1);
+			p->right = NULL;
+		}
+	}
+	std::shared_ptr<Client> tree(new Client("", "", "", 0, ""));
+	return tree;
+}
+
 struct status
 {
 	char SIM_num[12];
@@ -648,7 +667,6 @@ int main()
 	}
 
 	std::shared_ptr<Client> tree(new Client("", "", "", 0, ""));
-	std::shared_ptr<Client> saved(new Client("-", "-", "-", 0, "-"));
 
 	status *first = NULL;
 
@@ -825,8 +843,7 @@ int main()
 		case 10:
 		{
 			cout << "Очистка данных о клиентах." << endl;
-			tree = NULL;
-			tree = saved;
+			tree = removeAllClients(tree, 0);
 			break;
 		}
 		case 11:
