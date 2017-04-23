@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <Windows.h>
 #include <memory>
+#include <cmath>
 using namespace std;
 //нормальный проход дерева
 //сортировка  
@@ -24,6 +25,7 @@ using namespace std;
 //напишем списочек требований
 //удаление линейного списка
 //согласованность действий
+//переписать нормально хранение номеров сим и паспорта
 
 const int SEG = 100;
 const int AD = 20;
@@ -618,6 +620,7 @@ struct status
 	char pasport[12];
 	unsigned int dateGiven[3];
 	unsigned int dateEnd[3];
+	int num;
 	status *next;
 	bool free;
 
@@ -634,6 +637,11 @@ struct status
 		dateGiven[0] = 0; dateGiven[1] = 0; dateGiven[2] = 0;
 		dateEnd[0] = 0; dateEnd[1] = 0; dateEnd[2] = 0;
 		next = 0;
+		num = 0;
+		for (int i = 0; i < 12; i++)
+		{
+			num += pow(10, i)*(SIM_num[i] - 48);
+		}
 
 		free = true;
 	}
@@ -652,6 +660,12 @@ struct status
 		dateEnd[0] = de[0]; dateEnd[1] = de[1]; dateEnd[2] = de[2];
 		next = 0;
 		free = false;
+
+		num = 0;
+		for (int i = 0; i < 12; i++)
+		{
+			num += pow(10, i)*(SIM_num[i] - 48);
+		}
 	}
 };
 
