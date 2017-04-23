@@ -16,7 +16,6 @@ using namespace std;
 //не выдавать уже выданную
 //хэшфункция с коллизией в 13 и 14
 //проверки на длину?
-//убрать все "магические числа"
 //дата выдачи и дата возврата - надо же где-то выводить эту информацию
 //получается, что дата возврата ВООБЩЕ никуда не идет. в 14 пункте. может, конструктор переписать
 //выводить номера карт клиента?
@@ -32,6 +31,11 @@ using namespace std;
 const int SEG = 100;
 const int AD = 20;
 const int NAME = 20;
+const int P = 12;
+const int S = 12;
+const int TARIF = 10;
+const int PLNDATE = 20;
+
 int hash_func(char *str);
 
 char *enterChar(int size)
@@ -57,8 +61,8 @@ struct SIM
 	Тариф – строка;
 	Год выпуска – целое;
 	Признак наличия – логическое*/
-	char SIM_num[12];
-	char tarif[10];
+	char SIM_num[S];
+	char tarif[TARIF];
 	unsigned int year;
 	bool isFree;
 	bool isDeleted;
@@ -69,11 +73,11 @@ struct SIM
 
 	SIM(char *n, char *t, int y, bool free)
 	{
-		for (int i = 0; i < 11; ++i)
+		for (int i = 0; i < S - 1; ++i)
 			SIM_num[i] = n[i];
-		SIM_num[11] = 0;
+		SIM_num[S - 1] = 0;
 		int i = 0;
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < TARIF; i++)
 		{
 			if (t[i])
 				tarif[i] = t[i];
@@ -105,9 +109,9 @@ void printchar(char* m)
 
 char *enterNsim()
 {
-	char *num = new char[12];
+	char *num = new char[S];
 	std::cout << "Введите номер карты в формате 10 цифр. Тире будет добавлено автоматически." << endl;
-	for (int i = 0; i < 11; i++)
+	for (int i = 0; i < S - 1; i++)
 	{
 		if (i == 3)
 		{
@@ -119,16 +123,16 @@ char *enterNsim()
 			cin >> num[i];
 		}
 	}
-	num[11] = 0;
+	num[S - 1] = 0;
 	printchar(num);
 	return num;
 }
 
 char *enterPasp()
 {
-	char *num = new char[12];
+	char *num = new char[P];
 	std::cout << "Введите номер паспорта в формате 10 цифр. Тире будет добавлено автоматически." << endl;
-	for (int i = 0; i < 11; i++)
+	for (int i = 0; i < P - 1; i++)
 	{
 		if (i == 4)
 		{
@@ -140,19 +144,19 @@ char *enterPasp()
 			cin >> num[i];
 		}
 	}
-	num[11] = 0;
+	num[P - 1] = 0;
 	printchar(num);
 	return num;
 }
 
 char *enterTarif()
 {
-	char *t = new char[10];
+	char *t = new char[TARIF];
 	std::cout << "Введите тариф. Одно слово, без пробелов." << endl;
 	getchar();
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < TARIF; ++i)
 		t[i] = 0;
-	fgets(t, 10, stdin);
+	fgets(t, TARIF, stdin);
 	return t;
 }
 
@@ -183,8 +187,8 @@ int enterY()
 SIM *addSIM()
 {
 	SIM *newbie;
-	char *num = new char[12]; num = enterNsim();
-	char *t = new char[12]; t = enterTarif();
+	char *num = new char[S]; num = enterNsim();
+	char *t = new char[TARIF]; t = enterTarif();
 	int y = enterY();
 	newbie = new SIM(num, t, y, true);
 	return newbie;
@@ -192,13 +196,13 @@ SIM *addSIM()
 
 char *enterPlaceNdate()
 {
-	char *num = new char[20];
+	char *num = new char[PLNDATE];
 	std::cout << "Здесь Вы можете указать данные о выдаче паспорта." << endl;
 	cout << "Введите место и дату выдачи паспорта." << endl;
 	getchar();
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < PLNDATE; ++i)
 		num[i] = 0;
-	fgets(num, 20, stdin);
+	fgets(num, PLNDATE, stdin);
 	num[19] = 0;
 	printchar(num);
 	return num;
@@ -269,7 +273,7 @@ int hashplus(SIM *h[SEG], char *s)
 		}
 		else
 		{
-			if (samemas(s, h[i]->SIM_num, 12))
+			if (samemas(s, h[i]->SIM_num, S))
 			{
 				return -1;
 			}
@@ -292,8 +296,8 @@ public:
 	shared_ptr<Client> left;
 	shared_ptr<Client> right;
 
-	char pasport[12];
-	char placeNdate[20];
+	char pasport[P];
+	char placeNdate[PLNDATE];
 	char FIO[NAME];
 	int bdyear;
 	char address[AD];
@@ -302,15 +306,15 @@ public:
 
 	Client(char *p, char *plNd, char *f, int y, char *ad)
 	{
-		for (int i = 0; i < 11; ++i)
+		for (int i = 0; i < P - 1; ++i)
 			pasport[i] = p[i];
-		pasport[11] = 0;
+		pasport[P - 1] = 0;
 		std::hash<std::string> h;
 		key = (h(p));
 		if (key < 0)
 			key *= -1;
 
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < PLNDATE; i++)
 		{
 			if (plNd[i])
 				placeNdate[i] = plNd[i];
@@ -519,8 +523,8 @@ int *enterDate()
 
 std::shared_ptr<Client> addClient()
 {
-	char *pasport = new char[12]; pasport = enterPasp();
-	char *placeNdate = new char[20]; placeNdate = enterPlaceNdate();
+	char *pasport = new char[P]; pasport = enterPasp();
+	char *placeNdate = new char[PLNDATE]; placeNdate = enterPlaceNdate();
 	char *FIO = new char[NAME]; FIO = enterFIO();
 	int bdyear = 0;
 	bool right = false;
@@ -620,8 +624,8 @@ std::shared_ptr<Client> removeAllClients(std::shared_ptr<Client> p, int level)
 
 struct status
 {
-	char SIM_num[12];
-	char pasport[12];
+	char SIM_num[S];
+	char pasport[P];
 	int dateGiven[3];
 	int dateEnd[3];
 	int num;
@@ -630,13 +634,13 @@ struct status
 
 	status(char *s_num)
 	{
-		for (int i = 0; i < 11; ++i)
+		for (int i = 0; i < S - 1; ++i)
 			SIM_num[i] = s_num[i];
-		SIM_num[11] = '/0';
+		SIM_num[S - 1] = '/0';
 
-		for (int i = 0; i < 11; ++i)
+		for (int i = 0; i < P - 1; ++i)
 			pasport[i] = 0;
-		pasport[11] = '/0';
+		pasport[P - 1] = '/0';
 
 		dateGiven[0] = 0; dateGiven[1] = 0; dateGiven[2] = 0;
 		dateEnd[0] = 0; dateEnd[1] = 0; dateEnd[2] = 0;
@@ -653,13 +657,13 @@ struct status
 
 	status(char *s_num, char *pasp, int dg[3], int de[3])
 	{
-		for (int i = 0; i < 11; ++i)
+		for (int i = 0; i < S - 1; ++i)
 			SIM_num[i] = s_num[i];
-		SIM_num[11] = '/0';
+		SIM_num[S - 1] = '/0';
 
-		for (int i = 0; i < 11; ++i)
+		for (int i = 0; i < P - 1; ++i)
 			pasport[i] = pasp[i];
-		pasport[11] = '/0';
+		pasport[P - 1] = '/0';
 
 		dateGiven[0] = dg[0]; dateGiven[1] = dg[1]; dateGiven[2] = dg[2];
 		dateEnd[0] = de[0]; dateEnd[1] = de[1]; dateEnd[2] = de[2];
