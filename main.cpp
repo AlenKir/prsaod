@@ -4,7 +4,6 @@
 #include <cmath>
 using namespace std;
 //нормальный проход дерева
-//сортировка  
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
 //несколько элементов, образующих коллизию, а АВЛ - дерево должно
@@ -22,12 +21,13 @@ using namespace std;
 //получается, что дата возврата ВООБЩЕ никуда не идет. в 14 пункте. может, конструктор переписать
 //выводить номера карт клиента?
 //хэш функция в 13, коллизия 
-//напишем списочек требований
-//удаление линейного списка
+//удаление линейного списка ДАННЫЕ О СИМ_КАРТАХ
 //согласованность действий
 //переписать нормально хранение номеров сим и паспорта
 //вывести данные о возврате сим-карт?
 //как работает сортировка слиянием
+//добавить нижнее подчеркивание для отделения записей при выводе
+//hashplus
 
 const int SEG = 100;
 const int AD = 20;
@@ -244,6 +244,7 @@ void printsim(SIM *sim)
 			std::cout << "Карта находится в пользовании." << endl;
 		else
 			std::cout << "Карта свободна." << endl;
+		cout << "____________________" << endl;
 	}
 }
 
@@ -431,6 +432,7 @@ void printClient(std::shared_ptr<Client> c)
 	printchar(c->FIO);
 	cout << c->bdyear << endl;
 	printchar(c->address);
+	cout << "____________________" << endl;
 }
 
 void print(std::shared_ptr<Client> p, int level)
@@ -620,8 +622,8 @@ struct status
 {
 	char SIM_num[12];
 	char pasport[12];
-	unsigned int dateGiven[3];
-	unsigned int dateEnd[3];
+	int dateGiven[3];
+	int dateEnd[3];
 	int num;
 	status *next;
 	bool free;
@@ -671,6 +673,23 @@ struct status
 		}
 	}
 };
+
+void printDate(int *m)
+{
+	if (m[0])
+		cout << m[0] << "." << m[1] << "." << m[2] << "." << endl;
+}
+
+void printstatus(status *t)
+{
+	printchar(t->SIM_num);
+	printchar(t->pasport);
+	cout << "Дата выдачи: " << endl;
+	printDate(t->dateGiven);
+	cout << "Дата возврата: " << endl;
+	printDate(t->dateEnd);
+	cout << "____________________" << endl;
+}
 
 status *merge(status *a, status *b)
 {
@@ -758,7 +777,7 @@ int main()
 		std::cout << "Часто исполняемые действия:" << endl;
 		std::cout << "\t 13 - Регистрация выдачи клиенту SIM-карты" << endl;
 		std::cout << "\t 14 - Регистрация возврата SIM-карты от клиента" << endl;
-		std::cout << "\t 15 - Сортировка по номеру СИМ-карты" << endl;
+		std::cout << "\t 15 - Показать данные о выдаче и возврате" << endl;
 		std::cout << "Введите пункт меню." << endl;
 		cin >> item;
 
@@ -936,7 +955,6 @@ int main()
 				if (!exists(hlist[sim_key]))
 				{
 					cout << "Данной СИМ-карты нет в базе. Перед выдачей необходимо ее зарегистрировать." << endl;
-					//это вообще не очень законно, да?
 					break;
 				}
 				else if (exists(hlist[sim_key]) && !hlist[sim_key]->isFree)
@@ -1011,8 +1029,13 @@ int main()
 		}
 		case 15:
 		{
-			cout << "Сортировка по номеру СИМ-карты:" << endl;
 			mergesort(first);
+			status *temp = first;
+			while (temp)
+			{
+				printstatus(temp);
+				temp = temp->next;
+			}
 		}
 		}
 		cout << endl;
