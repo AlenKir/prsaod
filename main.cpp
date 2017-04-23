@@ -26,6 +26,8 @@ using namespace std;
 //удаление линейного списка
 //согласованность действий
 //переписать нормально хранение номеров сим и паспорта
+//вывести данные о возврате сим-карт?
+//как работает сортировка слиянием
 
 const int SEG = 100;
 const int AD = 20;
@@ -638,9 +640,10 @@ struct status
 		dateEnd[0] = 0; dateEnd[1] = 0; dateEnd[2] = 0;
 		next = 0;
 		num = 0;
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < 10; i++)
 		{
-			num += pow(10, i)*(SIM_num[i] - 48);
+			if (i != 3)
+				num += pow(1.5, i)*(SIM_num[i] - 48);
 		}
 
 		free = true;
@@ -661,13 +664,47 @@ struct status
 		next = 0;
 		free = false;
 
-		num = 0;
-		for (int i = 0; i < 12; i++)
+		for (int i = 0; i < 10; i++)
 		{
-			num += pow(10, i)*(SIM_num[i] - 48);
+			if (i != 3)
+				num += pow(1.5, i)*(SIM_num[i] - 48);
 		}
 	}
 };
+
+status *merge(status *a, status *b)
+{
+	if (!a)
+		return b;
+	if (!b)
+		return a;
+
+	status* c = 0;
+	if (a->num <= b->num)
+	{
+		c = a;
+		c->next = merge(a->next, b);
+	}
+	else
+	{
+		c = b;
+		c->next = merge(a, b->next);
+	}
+	return c;
+}
+
+status *mergesort(status *head)
+{
+	if (head == 0 || head->next == 0) return head;
+	status *a = head, *b = head->next;
+	while ((b != 0) && (b->next != 0))
+	{
+		head = head->next;
+		b = b->next->next;
+	}
+	b = head->next; head->next = NULL;
+	return merge(mergesort(a), mergesort(b));
+}
 
 int main()
 {
@@ -683,6 +720,12 @@ int main()
 	std::shared_ptr<Client> tree(new Client("", "", "", 0, ""));
 
 	status *first = NULL;
+	first = new status("111-111111");
+	status *second = new status("222-222222");
+	status *third = new status("000-000000");
+	first->next = second;
+	second->next = third;
+	first = mergesort(first);
 
 	int item = -1;
 	std::cout << "Добро пожаловать в систему обслуживания клиентов оператора сотовой связи!" << endl;
@@ -715,6 +758,7 @@ int main()
 		std::cout << "Часто исполняемые действия:" << endl;
 		std::cout << "\t 13 - Регистрация выдачи клиенту SIM-карты" << endl;
 		std::cout << "\t 14 - Регистрация возврата SIM-карты от клиента" << endl;
+		std::cout << "\t 15 - Сортировка по номеру СИМ-карты" << endl;
 		std::cout << "Введите пункт меню." << endl;
 		cin >> item;
 
@@ -964,6 +1008,11 @@ int main()
 				}
 			}
 			break;
+		}
+		case 15:
+		{
+			cout << "Сортировка по номеру СИМ-карты:" << endl;
+			mergesort(first);
 		}
 		}
 		cout << endl;
