@@ -3,6 +3,7 @@
 #include <memory>
 #include <cmath>
 using namespace std;
+//какого черта он не добавляет в статус
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
 //несколько элементов, образующих коллизию, а АВЛ - дерево должно
@@ -26,6 +27,8 @@ using namespace std;
 //как работает сортировка слиянием
 //добавить нижнее подчеркивание для отделения записей при выводе
 //hashplus
+//показывает данные о выдаче и возврате
+//нормальные параметры в findclient
 
 const int SEG = 100;
 const int AD = 20;
@@ -545,25 +548,24 @@ std::shared_ptr<Client> addClient()
 	return c;
 }
 
-bool findClient(std::shared_ptr<Client> p, std::uint32_t key, bool steps)
+std::shared_ptr<Client> findClient(std::shared_ptr<Client> p, std::uint32_t key, bool steps)
 {
 	//изменено
 	if (p) {
 		if (p->key == key)
 		{
 			printClient(p);
-			steps = true;
-			return steps;
+			return p;
 		}
 		if (key < p->key)
 		{
-			steps = findClient(p->left, key, steps);
-			return steps;
+			p = findClient(p->left, key, steps);
+			return p;
 		}
 		else
 		{
-			steps = findClient(p->right, key, steps);
-			return steps;
+			p = findClient(p->right, key, steps);
+			return p;
 		}
 	}
 	return 0;
@@ -787,13 +789,7 @@ int main()
 	}
 
 	std::shared_ptr<Client> tree(new Client("", "", "", 0, ""));
-
-	status *first = NULL;
-	first = new status("111-111111");
-	status *second = new status("222-222222");
-	status *third = new status("000-000000");
-	first->next = second;
-	second->next = third;
+	status *first = new status("000-000000");
 
 	int item = -1;
 	std::cout << "Добро пожаловать в систему обслуживания клиентов оператора сотовой связи!" << endl;
@@ -945,8 +941,8 @@ int main()
 		{
 			cout << "Регистрация нового клиента:" << endl;
 			std::shared_ptr<Client> c = addClient();
-			bool found = findClient(tree, c->key, 0);
-			if (found)
+			std::shared_ptr<Client> p = findClient(tree, c->key, 0);
+			if (p)
 				cout << "Невозможно добавление клиента с таким же номером паспорта." << endl;
 			else
 				tree = insert(tree, c->key, c);
@@ -977,7 +973,16 @@ int main()
 			cout << "Поиск клиента по номеру паспорта" << endl;
 			char *n = new char[12]; n = enterPasp();
 			std::shared_ptr<Client> t(new Client(n, "", "", 0, ""));
-			findClient(tree, t->key, 0);
+			t = findClient(tree, t->key, 0);
+			status *temp = first;
+			while (temp)
+			{
+				if (samemas(temp->pasport, n, P))
+				{
+					printstatus(temp);
+				}
+				temp = temp->next;
+			}
 			break;
 		}
 		case 12:
@@ -1003,10 +1008,9 @@ int main()
 		{
 			std::cout << "Регистрация выдачи клиенту SIM-карты." << endl;
 			char *pasp = new char[12]; pasp = enterPasp();
-			std::shared_ptr<Client> t(new Client(pasp, "", "", 0, ""));
-			int found = 0;
-			found = findClient(tree, t->key, 0);
-			if (found == 0)
+			std::shared_ptr<Client> p(new Client(pasp, "", "", 0, ""));
+			p = findClient(tree, p->key, 0);
+			if (!p)
 			{
 				cout << "Данного клиента нет в базе. Необходимо его зарегистрировать." << endl;
 				break;
@@ -1034,11 +1038,14 @@ int main()
 					int de[3] = { 0, 0, 0 };
 					status *reg = new status(num, pasp, dg, de);
 					status *temp = first;
+					status *prev = new status("smth");
+					prev->next = temp;
 					while (temp)
 					{
+						prev = temp;
 						temp = temp->next;
 					}
-					temp = reg;
+					prev->next = reg;
 					int k = hash_func(num);
 					hlist[k]->isFree = false;
 				}
@@ -1050,9 +1057,8 @@ int main()
 			std::cout << "Регистрация возврата SIM-карты от клиента:" << endl;
 			char *pasp = new char[12]; pasp = enterPasp();
 			std::shared_ptr<Client> t(new Client(pasp, "", "", 0, ""));
-			int found = 0;
-			found = findClient(tree, t->key, 0);
-			if (found == 0)
+			t = findClient(tree, t->key, 0);
+			if (!t)
 			{
 				cout << "Данного клиента нет в базе." << endl;
 				break;
