@@ -29,6 +29,7 @@ using namespace std;
 //hashplus
 //показывает данные о выдаче и возврате
 //нормальные параметры в findclient
+//нормально по функциональности
 
 const int SEG = 100;
 const int AD = 20;
@@ -234,7 +235,7 @@ bool samemas(char *a, char *b, int am)
 	bool same = true;
 	for (int i = 0; i < am; ++i)
 	{
-		if (!a[i] || !b[i] || a[i] == '\n' || b[i] == '\n')
+		if ((!a[i] || !b[i] || a[i] == '\n' || b[i] == '\n') && i != 0)
 			break;
 		if (a[i] != b[i])
 			return false;
@@ -777,6 +778,40 @@ status *mergesort(status *head)
 	return merge(mergesort(a), mergesort(b));
 }
 
+bool findClientbyPasp(std::shared_ptr<Client> p, char *piece)
+{
+	int i = 0;
+	bool found = false;
+	if (p)
+	{
+		found = samemas(p->FIO, piece, P);
+		if (found)
+		{
+			printchar(p->FIO);
+			return true;
+		}
+		found = findClientbyFIO(p->left, piece);
+		found = findClientbyFIO(p->right, piece);
+	}
+	return 0;
+}
+
+char* find_pasp_status(status *first, char *pasp)
+{
+	status *temp = first;
+	while (temp) {
+		if (samemas(pasp, temp->pasport, P))
+		{
+			cout << "Выдана:" << endl;
+			printchar(pasp);
+			return pasp;
+		}
+		else
+			temp = temp->next;
+	}
+	return 0;
+}
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -914,6 +949,9 @@ int main()
 					{
 						found = true;
 						printsim(hlist[i]);
+						char *pasp = find_pasp_status(first, n);
+						if (pasp)
+							findClientbyPasp(tree, pasp);
 					}
 				if (found)
 					break;
