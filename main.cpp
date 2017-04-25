@@ -3,7 +3,6 @@
 #include <memory>
 #include <cmath>
 using namespace std;
-//нормальный проход дерева
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
 //несколько элементов, образующих коллизию, а АВЛ - дерево должно
@@ -229,12 +228,15 @@ bool exists(SIM *s)
 
 bool samemas(char *a, char *b, int am)
 {
+	bool same = true;
 	for (int i = 0; i < am; ++i)
 	{
+		if (!a[i] || !b[i] || a[i] == '\n' || b[i] == '\n')
+			break;
 		if (a[i] != b[i])
 			return false;
 	}
-	return true;
+	return same;
 }
 
 void printsim(SIM *sim)
@@ -443,8 +445,8 @@ void print(std::shared_ptr<Client> p, int level)
 {
 	if (p)
 	{
-		print(p->left, level + 1);
 		printClient(p);
+		print(p->left, level + 1);
 		print(p->right, level + 1);
 	}
 }
@@ -622,6 +624,50 @@ std::shared_ptr<Client> removeAllClients(std::shared_ptr<Client> p, int level)
 	return tree;
 }
 
+bool findClientbyFIO(std::shared_ptr<Client> p, char *piece)
+{
+	int i = 0;
+	bool found = false;
+	if (p)
+	{
+		while (p->FIO[i])
+		{
+			found = samemas(&p->FIO[i], piece, 20);
+			if (found)
+			{
+				printClient(p);
+				break;
+			}
+			i++;
+		}
+		found = findClientbyFIO(p->left, piece);
+		found = findClientbyFIO(p->right, piece);
+	}
+	return 0;
+}
+
+bool findClientbyAddress(std::shared_ptr<Client> p, char *piece)
+{
+	int i = 0;
+	bool found = false;
+	if (p)
+	{
+		while (p->address[i])
+		{
+			found = samemas(&p->address[i], piece, 20);
+			if (found)
+			{
+				printClient(p);
+				break;
+			}
+			i++;
+		}
+		found = findClientbyAddress(p->left, piece);
+		found = findClientbyAddress(p->right, piece);
+	}
+	return 0;
+}
+
 struct status
 {
 	char SIM_num[S];
@@ -748,7 +794,6 @@ int main()
 	status *third = new status("000-000000");
 	first->next = second;
 	second->next = third;
-	first = mergesort(first);
 
 	int item = -1;
 	std::cout << "Добро пожаловать в систему обслуживания клиентов оператора сотовой связи!" << endl;
@@ -782,7 +827,7 @@ int main()
 		std::cout << "\t 13 - Регистрация выдачи клиенту SIM-карты" << endl;
 		std::cout << "\t 14 - Регистрация возврата SIM-карты от клиента" << endl;
 		std::cout << "\t 15 - Показать данные о выдаче и возврате" << endl;
-		std::cout << "Введите пункт меню." << endl;
+		std::cout << "Введите пункт меню. Выход - 0." << endl;
 		cin >> item;
 
 		switch (item)
@@ -938,6 +983,20 @@ int main()
 		case 12:
 		{
 			cout << "Поиск клиента по фрагментам ФИО или адреса" << endl;
+			char *piece = new char[10];
+			cout << "Если вы хотите найти по фрагменту ФИО, наберите 1." << endl;
+			int h;
+			cin >> h;
+			printf("Введите фрагмент: \n");
+			getchar();
+			fgets(piece, 10, stdin);
+			if (h == 1) {
+				findClientbyFIO(tree, piece);
+			}
+			else
+			{
+				findClientbyAddress(tree, piece);
+			}
 			break;
 		}
 		case 13:
@@ -1033,8 +1092,16 @@ int main()
 		}
 		case 15:
 		{
-			mergesort(first);
+			cout << "До сортировки:" << endl;
 			status *temp = first;
+			while (temp)
+			{
+				printstatus(temp);
+				temp = temp->next;
+			}
+			mergesort(first);
+			cout << "\n После сортировки: \n" << endl;
+			temp = first;
 			while (temp)
 			{
 				printstatus(temp);
