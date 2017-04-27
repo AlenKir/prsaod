@@ -3,6 +3,7 @@
 #include <memory>
 #include <cmath>
 using namespace std;
+//hash_plus
 //какого черта он не добавляет в статус
 //данная карта уже занята (13)
 //в хеш - таблицу должны быть внесены
@@ -29,7 +30,9 @@ using namespace std;
 //hashplus
 //показывает данные о выдаче и возврате
 //нормальные параметры в findclient
-//нормально по функциональности
+//нормально по функциональности 
+//какой-нибудь порядок в методах, мм?
+//НАПИСАТЬ ФУНКЦИЮ ДЛЯ ПОИСКА СИМ_КАРТЫ В ХЕШ_ТАБЛИЦЕ, заменить это в 13 и 14 пункте
 
 const int SEG = 100;
 const int AD = 20;
@@ -38,6 +41,7 @@ const int P = 12;
 const int S = 12;
 const int TARIF = 10;
 const int PLNDATE = 20;
+const int C = 3;
 
 int hash_func(char *str);
 
@@ -267,7 +271,7 @@ int hash_func(char *str)
 	return N;
 }
 
-int hashplus(SIM *h[SEG], char *s)
+int hash_to_add(SIM *h[SEG], char *s)
 {
 	int i = hash_func(s);
 	int j = 1;
@@ -284,7 +288,8 @@ int hashplus(SIM *h[SEG], char *s)
 				return -1;
 			}
 		}
-		i += 3 * j;
+		i += C * j;
+		j++;
 	}
 }
 
@@ -735,6 +740,8 @@ void printDate(int *m)
 
 void printstatus(status *t)
 {
+	t->SIM_num[11] = 0;
+	t->pasport[11] = 0;
 	printchar(t->SIM_num);
 	printchar(t->pasport);
 	cout << "Дата выдачи: " << endl;
@@ -869,19 +876,13 @@ int main()
 			SIM *newbie = addSIM();
 			int j = -1;
 			int am = 0;
-			while (j == -1 && am < 100)
+			j = hash_to_add(hlist, newbie->SIM_num);
+			if (j != -1)
+				hlist[j] = newbie;
+			else
 			{
-				j = hashplus(hlist, newbie->SIM_num);
-				if (j != -1)
-					hlist[j] = newbie;
-				else
-				{
-					cout << "Данная SIM-карта уже присутствует в базе." << endl; break;
-				}
-				am++;
+				cout << "Данная SIM-карта уже присутствует в базе." << endl; break;
 			}
-			if (am == 100)
-				cout << "Невозможно добавление СИМ-карты с таким номером." << endl;
 			break;
 		}
 		case 2:
@@ -891,7 +892,7 @@ int main()
 			bool found = false;
 			int i = hash_func(n);
 			int am = 0;
-			for (int j = 1; am < SEG; i += 3 * j, ++j, ++am)
+			for (int j = 1; am < SEG; i += C * j, ++j, ++am)
 			{
 				if (exists(hlist[i]))
 					if (samemas(hlist[i]->SIM_num, n, 12))
@@ -940,7 +941,7 @@ int main()
 			bool found = false;
 			int i = hash_func(n);
 			int am = 0;
-			for (int j = 1; am < SEG; i += 3 * j, ++j, ++am)
+			for (int j = 1; am < SEG; i += C * j, ++j, ++am)
 			{
 				if (i >= SEG)
 					i = i % SEG;
@@ -1057,6 +1058,12 @@ int main()
 			{
 				char *num = new char[12]; num = enterNsim();
 				int sim_key = hash_func(num);
+				/*int i = 1;*/
+				/*while (!samemas(hlist[sim_key]->SIM_num, num, S))
+				{
+				sim_key += C*i;
+				i++;
+				}*/
 				if (!exists(hlist[sim_key]))
 				{
 					cout << "Данной СИМ-карты нет в базе. Перед выдачей необходимо ее зарегистрировать." << endl;
@@ -1078,10 +1085,14 @@ int main()
 					status *temp = first;
 					status *prev = new status("smth");
 					prev->next = temp;
-					while (temp)
-					{
-						prev = temp;
-						temp = temp->next;
+					if (first->num == 0)
+						first = reg;
+					else {
+						while (temp)
+						{
+							temp = temp->next;
+						}
+						temp = reg;
 					}
 					prev->next = reg;
 					int k = hash_func(num);
@@ -1123,11 +1134,15 @@ int main()
 					de = enterDate();
 					status *reg = new status(num);
 					status *temp = first;
-					while (temp)
-					{
-						temp = temp->next;
+					if (first->num == 0)
+						first = reg;
+					else {
+						while (temp)
+						{
+							temp = temp->next;
+						}
+						temp = reg;
 					}
-					temp = reg;
 					int k = hash_func(num);
 					hlist[k]->isFree = true;
 				}
