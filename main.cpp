@@ -271,27 +271,54 @@ int hash_func(char *str)
 	return N;
 }
 
-int hash_to_add(SIM *h[SEG], char *s)
+bool add_to_hash(SIM *h[SEG], SIM *newbie)
 {
-	int i = hash_func(s);
+	bool added = false;
+	int i = hash_func(newbie->SIM_num);
 	int j = 1;
-	while (j<100)
+	while (j < 10)
 	{
 		if (!h[i])
 		{
-			return i;
+			h[i] = newbie;
+			return true;
 		}
 		else
 		{
-			if (samemas(s, h[i]->SIM_num, S))
+			if (samemas(newbie->SIM_num, h[i]->SIM_num, S))
 			{
-				return -1;
+				return false;
 			}
 		}
 		i += C * j;
+		if (i >= SEG)
+			i = i % SEG;
 		j++;
 	}
+	return added;
 }
+
+//int hash_to_add(SIM *h[SEG], char *s)
+//{
+//	int i = hash_func(s);
+//	int j = 1;
+//	while (j<100)
+//	{
+//		if (!h[i])
+//		{
+//			return i;
+//		}
+//		else
+//		{
+//			if (samemas(s, h[i]->SIM_num, S))
+//			{
+//				return -1;
+//			}
+//		}
+//		i += C * j;
+//		j++;
+//	}
+//}
 
 
 class Client
@@ -874,15 +901,10 @@ int main()
 		{
 			std::cout << "Добавление новой SIM-карты:" << endl;
 			SIM *newbie = addSIM();
-			int j = -1;
-			int am = 0;
-			j = hash_to_add(hlist, newbie->SIM_num);
-			if (j != -1)
-				hlist[j] = newbie;
-			else
-			{
-				cout << "Данная SIM-карта уже присутствует в базе." << endl; break;
-			}
+			bool added = false;
+			added = add_to_hash(hlist, newbie);
+			if (!added)
+				cout << "Невозможно добавление СИМ-карты с таким номером." << endl;
 			break;
 		}
 		case 2:
