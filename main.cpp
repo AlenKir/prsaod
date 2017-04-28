@@ -305,7 +305,7 @@ int find_hash(SIM *h[SEG], char *num)
 	int j = 1;
 	while (j < SEG)
 	{
-		if (exists(h[i]))
+		if (h[i])
 			if (samemas(num, h[i]->SIM_num, S))
 			{
 				return i;
@@ -816,14 +816,14 @@ bool findClientbyPasp(std::shared_ptr<Client> p, char *piece)
 	bool found = false;
 	if (p)
 	{
-		found = samemas(p->FIO, piece, P);
+		found = samemas(p->pasport, piece, P);
 		if (found)
 		{
 			printchar(p->FIO);
 			return true;
 		}
-		found = findClientbyFIO(p->left, piece);
-		found = findClientbyFIO(p->right, piece);
+		found = findClientbyPasp(p->left, piece);
+		found = findClientbyPasp(p->right, piece);
 	}
 	return 0;
 }
@@ -837,6 +837,22 @@ char* find_pasp_status(status *first, char *pasp)
 			cout << "Выдана:" << endl;
 			printchar(pasp);
 			return pasp;
+		}
+		else
+			temp = temp->next;
+	}
+	return 0;
+}
+char* find_pasp_status_by_num(status *first, char *num)
+{
+	status *temp = first;
+	while (temp) {
+		if (samemas(num, temp->SIM_num, S))
+		{
+			cout << "Выдана:" << endl;
+			temp->pasport[P - 1] = 0;
+			printchar(temp->pasport);
+			return temp->pasport;
 		}
 		else
 			temp = temp->next;
@@ -948,23 +964,14 @@ int main()
 			cout << "Поиск SIM-карты по номеру SIM-карты:" << endl;
 			char *n = new char[12]; n = enterNsim();
 			bool found = false;
-			int i = hash_func(n);
-			int am = 0;
-			for (int j = 1; am < SEG; i += C * j, ++j, ++am)
+			int key = find_hash(hlist, n);
+			if (key)
 			{
-				if (i >= SEG)
-					i = i % SEG;
-				if (exists(hlist[i]))
-					if (samemas(hlist[i]->SIM_num, n, 12))
-					{
-						found = true;
-						printsim(hlist[i]);
-						char *pasp = find_pasp_status(first, n);
-						if (pasp)
-							findClientbyPasp(tree, pasp);
-					}
-				if (found)
-					break;
+				found = true;
+				printsim(hlist[key]);
+				char *pasp = find_pasp_status_by_num(first, n);
+				if (pasp)
+					findClientbyPasp(tree, pasp);
 			}
 			if (!found)
 				cout << "Карты не обнаружено." << endl;
