@@ -276,7 +276,7 @@ bool add_to_hash(SIM *h[SEG], SIM *newbie)
 	bool added = false;
 	int i = hash_func(newbie->SIM_num);
 	int j = 1;
-	while (j < 10)
+	while (j < SEG)
 	{
 		if (!h[i])
 		{
@@ -298,28 +298,26 @@ bool add_to_hash(SIM *h[SEG], SIM *newbie)
 	return added;
 }
 
-//int hash_to_add(SIM *h[SEG], char *s)
-//{
-//	int i = hash_func(s);
-//	int j = 1;
-//	while (j<100)
-//	{
-//		if (!h[i])
-//		{
-//			return i;
-//		}
-//		else
-//		{
-//			if (samemas(s, h[i]->SIM_num, S))
-//			{
-//				return -1;
-//			}
-//		}
-//		i += C * j;
-//		j++;
-//	}
-//}
+int find_hash(SIM *h[SEG], char *num)
+{
+	int key = 0;
+	int i = hash_func(num);
+	int j = 1;
+	while (j < SEG)
+	{
+		if (exists(h[i]))
+			if (samemas(num, h[i]->SIM_num, S))
+			{
+				return i;
+			}
+		i += C * j;
 
+		if (i >= SEG)
+			i = i % SEG;
+		j++;
+	}
+	return key;
+}
 
 class Client
 {
@@ -911,24 +909,13 @@ int main()
 		{
 			std::cout << "Удаление сведений о SIM-карте:" << endl;
 			char *n = new char[12]; n = enterNsim();
-			bool found = false;
-			int i = hash_func(n);
-			int am = 0;
-			for (int j = 1; am < SEG; i += C * j, ++j, ++am)
+			int key = find_hash(hlist, n);
+			if (key)
 			{
-				if (exists(hlist[i]))
-					if (samemas(hlist[i]->SIM_num, n, 12))
-					{
-						hlist[i] = 0;
-						found = true;
-						cout << "Удаление произведено." << endl;
-					}
-				if (found)
-					break;
-				if (i >= SEG)
-					i = i % SEG;
+				hlist[key] = 0;
+				cout << "Удаление произведено." << endl;
 			}
-			if (!found)
+			else
 				cout << "Карты не обнаружено." << endl;
 			break;
 		}
