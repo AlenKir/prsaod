@@ -3,36 +3,16 @@
 #include <memory>
 #include <cmath>
 using namespace std;
-//hash_plus
-//какого черта он не добавляет в статус
-//данная карта уже занята (13)
-//в хеш - таблицу должны быть внесены
-//несколько элементов, образующих коллизию, а АВЛ - дерево должно
-//заполняться данными таким образом, чтобы продемонстрировать процесс его
-//балансировки.
-//поиск СИМкарты: почему "карт не обнаружено" и почему он не все найденные по тарифу выводит
-//возврат сим-карты, признак наличия
-//работа с признаком наличия
-//признак наличия где должен быть, в какой структуре
-//не выдавать уже выданную
-//хэшфункция с коллизией в 13 и 14
-//проверки на длину?
-//дата выдачи и дата возврата - надо же где-то выводить эту информацию
-//получается, что дата возврата ВООБЩЕ никуда не идет. в 14 пункте. может, конструктор переписать
-//выводить номера карт клиента?
-//хэш функция в 13, коллизия 
-//удаление линейного списка ДАННЫЕ О СИМ_КАРТАХ
+
 //согласованность действий
-//переписать нормально хранение номеров сим и паспорта
-//вывести данные о возврате сим-карт?
 //как работает сортировка слиянием
-//добавить нижнее подчеркивание для отделения записей при выводе
-//hashplus
-//показывает данные о выдаче и возврате
 //нормальные параметры в findclient
 //нормально по функциональности 
 //какой-нибудь порядок в методах, мм?
-//НАПИСАТЬ ФУНКЦИЮ ДЛЯ ПОИСКА СИМ_КАРТЫ В ХЕШ_ТАБЛИЦЕ, заменить это в 13 и 14 пункте
+//сделать функцию correct, которая будет контролировать конец фиксированных полей
+//сделать нормальную сортировку при выводе, где merge
+//нормальный поиск клиента в 14
+//4?
 
 const int SEG = 100;
 const int AD = 20;
@@ -640,6 +620,32 @@ std::shared_ptr<Client> removeClient(std::shared_ptr<Client> p, std::uint32_t k)
 	return balance(p);
 }
 
+std::shared_ptr<Client> removeClientbyPasp(std::shared_ptr<Client> p, char *piece)
+{
+	int i = 0;
+	bool found = false;
+	if (p)
+	{
+		found = samemas(p->pasport, piece, P);
+		if (found)
+		{
+			std::shared_ptr<Client> q = p->left;
+			std::shared_ptr<Client> r = p->right;
+			if (!r) return q;
+			std::shared_ptr<Client> min = findmin(r);
+			min->right = removemin(r);
+			min->left = q;
+			return balance(min);
+		}
+		else {
+			removeClientbyPasp(p->left, piece);
+			if (!found)
+				removeClientbyPasp(p->right, piece);
+		}
+	}
+	return balance(p);
+}
+
 std::shared_ptr<Client> removeAllClients(std::shared_ptr<Client> p, int level)
 {
 	if (p)
@@ -734,6 +740,9 @@ struct status
 		free = true;
 	}
 
+	status()
+	{}
+
 	status(char *s_num, char *pasp, int dg[3], int de[3])
 	{
 		for (int i = 0; i < S - 1; ++i)
@@ -822,10 +831,13 @@ bool findClientbyPasp(std::shared_ptr<Client> p, char *piece)
 			printchar(p->FIO);
 			return true;
 		}
-		found = findClientbyPasp(p->left, piece);
-		found = findClientbyPasp(p->right, piece);
+		else {
+			found = findClientbyPasp(p->left, piece);
+			if (!found)
+				found = findClientbyPasp(p->right, piece);
+		}
 	}
-	return 0;
+	return found;
 }
 
 char* find_pasp_status(status *first, char *pasp)
@@ -858,6 +870,11 @@ char* find_pasp_status_by_num(status *first, char *num)
 			temp = temp->next;
 	}
 	return 0;
+}
+
+void to_null(char *m)
+{
+	m = "";
 }
 
 int main()
@@ -957,6 +974,15 @@ int main()
 				hlist[i] = 0;
 			}
 			cout << "База SIM-карт пуста." << endl;
+			status *temp = first;
+			while (first)
+			{
+				temp = first;
+				first = temp->next;
+				delete temp;
+			}
+			status *first = new status("000-000000");
+			first->next = NULL;
 			break;
 		}
 		case 5:
@@ -986,7 +1012,10 @@ int main()
 			{
 				if (exists(hlist[i]))
 					if (samemas(hlist[i]->tarif, t, 10))
+					{
 						printsim(hlist[i]);
+						found = true;
+					}
 			}
 			if (!found)
 				cout << "Карт не обнаруженo." << endl;
@@ -1007,8 +1036,7 @@ int main()
 		{
 			cout << "Снятие с обслуживания клиента" << endl;
 			char *n = new char[12]; n = enterPasp();
-			std::shared_ptr<Client> t(new Client(n, "", "", 0, ""));
-			removeClient(tree, t->key);
+			tree = removeClientbyPasp(tree, n);
 			break;
 		}
 		case 9:
@@ -1063,9 +1091,8 @@ int main()
 		{
 			std::cout << "Регистрация выдачи клиенту SIM-карты." << endl;
 			char *pasp = new char[12]; pasp = enterPasp();
-			std::shared_ptr<Client> p(new Client(pasp, "", "", 0, ""));
-			p = findClient(tree, p->key, 0);
-			if (!p)
+			bool found = findClientbyPasp(tree, pasp);
+			if (!found)
 			{
 				cout << "Данного клиента нет в базе. Необходимо его зарегистрировать." << endl;
 				break;
@@ -1073,19 +1100,13 @@ int main()
 			else
 			{
 				char *num = new char[12]; num = enterNsim();
-				int sim_key = hash_func(num);
-				/*int i = 1;*/
-				/*while (!samemas(hlist[sim_key]->SIM_num, num, S))
-				{
-				sim_key += C*i;
-				i++;
-				}*/
-				if (!exists(hlist[sim_key]))
+				int sim_key = find_hash(hlist, num);
+				if (!sim_key)
 				{
 					cout << "Данной СИМ-карты нет в базе. Перед выдачей необходимо ее зарегистрировать." << endl;
 					break;
 				}
-				else if (exists(hlist[sim_key]) && !hlist[sim_key]->isFree)
+				else if (!hlist[sim_key]->isFree)
 				{
 					cout << "Данная сим-карта уже занята." << endl;
 					break;
@@ -1111,8 +1132,7 @@ int main()
 						temp = reg;
 					}
 					prev->next = reg;
-					int k = hash_func(num);
-					hlist[k]->isFree = false;
+					hlist[sim_key]->isFree = false;
 				}
 			}
 			break;
@@ -1131,36 +1151,36 @@ int main()
 			else
 			{
 				char *num = new char[12]; num = enterNsim();
-				int sim_key = hash_func(num);
-				if (!exists(hlist[sim_key]))
+				int sim_key = find_hash(hlist, num);
+				if (!sim_key)
 				{
 					cout << "Данной СИМ-карты нет в базе." << endl;
 					break;
 				}
-				else if (exists(hlist[sim_key]) && !hlist[sim_key]->isFree)
+				else if (hlist[sim_key]->isFree)
 				{
-					cout << "Данная сим-карта уже занята." << endl;
+					cout << "Данная сим-карта свободна." << endl;
 					break;
 				}
 				else
 				{
-					//ввод ЛЕТ
 					cout << "Дата возврата карты." << endl;
 					int *de = new int[3];
 					de = enterDate();
-					status *reg = new status(num);
 					status *temp = first;
-					if (first->num == 0)
-						first = reg;
-					else {
-						while (temp)
+					bool added = false;
+					while (!added && temp)
+					{
+						if (samemas(temp->SIM_num, num, S))
 						{
-							temp = temp->next;
+							added = true;
+							temp->dateGiven[0] = 0; temp->dateGiven[1] = 0; temp->dateGiven[2] = 0;
+							temp->dateEnd[0] = de[0]; temp->dateEnd[1] = de[1]; temp->dateEnd[2] = de[2];
+							to_null(temp->pasport);
 						}
-						temp = reg;
+						temp = temp->next;
 					}
-					int k = hash_func(num);
-					hlist[k]->isFree = true;
+					hlist[sim_key]->isFree = true;
 				}
 			}
 			break;
